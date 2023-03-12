@@ -1,23 +1,33 @@
-const express = require('express');
-const path = require('path');
+// External Modules:
+const express = require('express')
+const colors = require('colors')
+require('dotenv').config()
 
-const productRoutes = require('./routes/product');
+// Internal Modules:
+const routes = require('./src/routes')
+const {
+  notFoundHandler,
+  errorHandler,
+} = require('./src/middlewares/errorHandler')
+// const { mongooseConnection } = require('./src/config/db')
+const globalMiddlewares = require('./src/middlewares/globalMiddlewares')
 
-const app = express();
+// Initialization:
+const app = express()
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  next();
-});
+// Databse Connection:
+// mongooseConnection()
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use(express.static('images'));
+// Global Middlwares
+app.use(globalMiddlewares)
 
-app.use(express.urlencoded({extended: true}));
-app.use(express.json());
+// Routes:
+app.use(routes)
 
-app.use('/api/products', productRoutes);
+//Not Found & Error Handler
+app.use([notFoundHandler, errorHandler])
 
-module.exports = app;
+// Server:
+app.listen(process.env.PORT, () =>
+  console.log(`Server listening on port ${process.env.PORT}`.rainbow.bold)
+)
